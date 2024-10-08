@@ -50,6 +50,10 @@ export default async function handler(req, res) {
             audioFormats: audioFormats,
         })
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch video info' })
+        console.error(err) // Log the actual error to the console
+        res.status(500).json({
+            error: 'Failed to fetch video info',
+            details: err.message,
+        })
     }
 }
