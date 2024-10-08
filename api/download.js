@@ -1,4 +1,6 @@
-import youtubedl from 'youtube-dl-exec'
+import { exec } from 'child_process'
+import util from 'util'
+const execPromise = util.promisify(exec)
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -12,12 +14,11 @@ export default async function handler(req, res) {
     }
 
     try {
-        const info = await youtubedl(url, {
-            dumpSingleJson: true,
-            noWarnings: true,
-            preferFreeFormats: true,
-            youtubeSkipDashManifest: true,
-        })
+        // Use yt-dlp command directly
+        const { stdout } = await execPromise(
+            `yt-dlp -j --no-warnings --prefer-free-formats --youtube-skip-dash-manifest ${url}`
+        )
+        const info = JSON.parse(stdout)
 
         const videoFormats = info.formats
             .filter(
