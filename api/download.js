@@ -15,10 +15,14 @@ export default async function handler(req, res) {
 
     try {
         // Use yt-dlp command directly
-        const { stdout } = await execPromise(
+        const { stdout, stderr } = await execPromise(
             `yt-dlp -j --no-warnings --prefer-free-formats --youtube-skip-dash-manifest ${url}`
         )
-        const info = JSON.parse(stdout)
+
+        console.log('STDOUT:', stdout) // Log stdout for debugging
+        console.log('STDERR:', stderr) // Log stderr for debugging
+
+        const info = JSON.parse(stdout) // Try parsing stdout
 
         const videoFormats = info.formats
             .filter(
