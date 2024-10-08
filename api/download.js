@@ -1,14 +1,10 @@
-import express from 'express'
 import youtubedl from 'youtube-dl-exec'
-import cors from 'cors'
 
-const app = express()
-const port = 4000
+export default async function handler(req, res) {
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' })
+    }
 
-app.use(express.json())
-app.use(cors())
-
-app.post('/download', async (req, res) => {
     const { url } = req.body
 
     if (!url) {
@@ -16,7 +12,6 @@ app.post('/download', async (req, res) => {
     }
 
     try {
-        // Fetch video details using youtube-dl-exec
         const info = await youtubedl(url, {
             dumpSingleJson: true,
             noWarnings: true,
@@ -24,7 +19,6 @@ app.post('/download', async (req, res) => {
             youtubeSkipDashManifest: true,
         })
 
-        // Separate video formats and audio-only formats
         const videoFormats = info.formats
             .filter(
                 (format) => format.acodec !== 'none' && format.vcodec !== 'none'
@@ -40,7 +34,7 @@ app.post('/download', async (req, res) => {
         const audioFormats = info.formats
             .filter(
                 (format) => format.acodec !== 'none' && format.vcodec === 'none'
-            ) // Audio-only formats
+            )
             .map((format) => ({
                 quality: format.format_note || 'Audio',
                 size: format.filesize
@@ -58,8 +52,4 @@ app.post('/download', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'Failed to fetch video info' })
     }
-})
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`)
-})
+}
